@@ -1,77 +1,85 @@
-from abc import ABC, abstractmethod
+import abc
 from random import randint
 
 
-class SubjectInterface(ABC):
-	@abstractmethod
-	def attach(self, observer):
-		pass
+class SubjectInterface(abc.ABC):
+    @abc.abstractmethod
+    def attach(self, observer):
+        pass
 
-	@abstractmethod
-	def detach(self, observer):
-		pass
+    @abc.abstractmethod
+    def detach(self, observer):
+        pass
 
-	@abstractmethod
-	def notify(self):
-		pass
+    @abc.abstractmethod
+    def notify(self):
+        pass
 
 
 class Subject(SubjectInterface):
-	def __init__(self):
-		self._observers = list()
-		self.number = -1
+    def __init__(self):
+        self._observers = []
+        self.number = -1
 
-	def attach(self, observer):
-		if observer not in self._observers:
-			self._observers.append(observer)
+    def attach(self, observer):
+        if observer not in self._observers:
+            self._observers.append(observer)
 
-	def detach(self, observer):
-		if observer in self._observers:
-			self._observers.remove(observer)
+    def detach(self, observer):
+        if observer in self._observers:
+            self._observers.remove(observer)
 
-	def notify(self, **kwargs):
-		for observer in self._observers:
-			observer.update(self)
+    def notify(self, **kwargs):
+        for observer in self._observers:
+            observer.update(self)
 
-	def some_logic(self):
-		self.number = randint(0, 7)
-		self.notify()
-		print()
-
+    def some_execution(self):
+        self.number = randint(1, 8)
+        self.notify()
 
 
-class ObserverInterface(ABC):
-	@abstractmethod
-	def update(self, subject):
-		pass
+class ObserverInterface(abc.ABC):
+    @abc.abstractmethod
+    def update(self, subject):
+        pass
 
 
-class Observer_A(ObserverInterface):
-	def update(self, subject):
-		if 0 <= subject.number <= 2 or 5 <= subject.number <= 7:
-			print('Updating Observer_A:', subject.number)
+class ObserverA(ObserverInterface):
+    def update(self, subject):
+        print("Notification sent to ObserverA >>", subject.number)
 
 
-class Observer_B(ObserverInterface):
-	def update(self, subject):
-		if 2 <= subject.number <= 5:
-			print('Updating Observer_B:', subject.number)
+class ObserverB(ObserverInterface):
+    def update(self, subject):
+        print("Notification sent to ObserverB >>", subject.number)
 
+
+class ObserverC(ObserverInterface):
+    def update(self, subject):
+        print("Notification sent to ObserverC >>", subject.number)
 
 
 if __name__ == '__main__':
-	subject = Subject()
+    subject = Subject()
 
-	observer_a = Observer_A()
-	observer_b = Observer_B()
+    print("Before attaching any observer -->>")
+    subject.some_execution()
 
-	subject.attach(observer_a)
-	subject.attach(observer_b)
+    observer_a = ObserverA()
+    observer_b = ObserverB()
+    # Attaching observer_a, observer_b
+    subject.attach(observer_a)
+    subject.attach(observer_b)
+    print("\nAfter attaching ObserverA, ObserverB -->>")
+    subject.some_execution()
 
-	for _ in range(5):
-		subject.some_logic()
+    observer_c = ObserverC()
+    # Attaching observer_c
+    subject.attach(observer_c)
+    print("\nAfter attaching ObserverC (ObserverA, ObserverB were previously attached) -->>")
+    subject.some_execution()
 
-	print('....... After Detaching .........\n')
-	subject.detach(observer_a)
-	for _ in range(5):
-		subject.some_logic()
+    # Detaching observer_b
+    subject.detach(observer_b)
+    print("\nAfter detaching ObserverB from ObserverA, ObserverB, ObserverC -->>")
+    subject.some_execution()
